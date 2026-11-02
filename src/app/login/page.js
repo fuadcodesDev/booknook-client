@@ -1,10 +1,11 @@
 
 "use client";
 
-import { useState } from "react";
+
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +15,10 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+useEffect(() => {
+  document.title = "Login | BookNook";
+}, []);
 
   async function handleLogin(event) {
     event.preventDefault();

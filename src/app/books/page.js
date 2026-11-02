@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, BookOpen, LoaderCircle } from "lucide-react";
 
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function BooksPage() {
@@ -13,6 +14,10 @@ export default function BooksPage() {
   const [category, setCategory] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+useEffect(() => {
+  document.title = "All Books | BookNook";
+}, []);
 
   useEffect(() => {
     async function fetchBooks() {
@@ -56,6 +61,7 @@ export default function BooksPage() {
 
     return matchesSearch && matchesCategory;
   });
+  
 
   return (
     <section className="min-h-screen bg-[#f8f6f0] px-4 py-12">

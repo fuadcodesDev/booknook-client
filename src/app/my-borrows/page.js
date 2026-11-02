@@ -17,6 +17,10 @@ export default function MyBorrowsPage() {
   const [message, setMessage] = useState("");
   const [returningId, setReturningId] = useState("");
 
+useEffect(() => {
+  document.title = "My Borrow | BookNook";
+}, []);
+
   const fetchBorrows = useCallback(async () => {
     try {
       setError("");

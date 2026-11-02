@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const categories = ["Fiction", "Science", "History", "Kids", "Others"];
@@ -26,6 +27,10 @@ export default function AddBookPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+  document.title = "Add Book | BookNook";
+}, []);
 
   useEffect(() => {
     return () => {

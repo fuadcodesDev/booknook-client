@@ -29,6 +29,10 @@ export default function ProfilePage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+useEffect(() => {
+  document.title = "Add Book | BookNook";
+}, []);
+
   useEffect(() => {
     if (!isPending && !session?.user) {
       router.replace("/login");
