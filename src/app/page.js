@@ -1,69 +1,263 @@
-import Image from "next/image";
+
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { ArrowRight, BookOpen, Library, Sparkles } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, EffectFade } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
+
+const slides = [
+  {
+    eyebrow: "WELCOME TO BOOKNOOK",
+    title: "Every book opens a new world.",
+    description:
+      "Discover stories, explore ideas, and find your next favorite read in our growing library.",
+    image:
+      "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2000",
+  },
+  {
+    eyebrow: "EXPLORE. DISCOVER. READ.",
+    title: "Find the story waiting for you.",
+    description:
+      "From timeless classics to fascinating discoveries, your next adventure starts here.",
+    image:
+      "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?q=80&w=2000",
+  },
+  {
+    eyebrow: "YOUR READING JOURNEY",
+    title: "Make room for more stories.",
+    description:
+      "Borrow books, build your collection, and make every reading moment count.",
+    image:
+      "https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=2000",
+  },
+];
 
 export default function Home() {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchBooks() {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/books`
+        );
+
+        if (!response.ok) {
+          throw new Error("Unable to load books.");
+        }
+
+        const data = await response.json();
+        setBooks(data.slice(0, 6));
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBooks();
+  }, []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="bg-[#faf9f6]">
+      {/* Hero Slider */}
+      <section className="relative">
+        <Swiper
+          modules={[Autoplay, Pagination, EffectFade]}
+          effect="fade"
+          autoplay={{ delay: 4500, disableOnInteraction: false }}
+          pagination={{ clickable: true }}
+          loop
+          className="h-[560px] md:h-[650px]"
+        >
+          {slides.map((slide, index) => (
+            <SwiperSlide key={index}>
+              <div
+                className="relative flex h-full items-center bg-cover bg-center"
+                style={{ backgroundImage: `url(${slide.image})` }}
+              >
+                <div className="absolute inset-0 bg-black/55" />
+
+                <div className="relative z-10 mx-auto w-full max-w-7xl px-6 text-white lg:px-8">
+                  <p className="mb-5 text-sm font-semibold tracking-[0.3em] text-[#e2bd7c]">
+                    {slide.eyebrow}
+                  </p>
+
+                  <h1 className="max-w-3xl font-serif text-4xl font-bold leading-tight md:text-6xl lg:text-7xl">
+                    {slide.title}
+                  </h1>
+
+                  <p className="mt-6 max-w-xl text-base leading-8 text-white/85 md:text-lg">
+                    {slide.description}
+                  </p>
+
+                  <Link
+                    href="/books"
+                    className="mt-9 inline-flex items-center gap-3 rounded-full bg-[#d5ad67] px-8 py-4 font-semibold text-[#183729] transition hover:bg-white"
+                  >
+                    Browse Books <ArrowRight size={18} />
+                  </Link>
+                </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </section>
+
+      {/* Latest Books */}
+      <section className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
+        <div className="mb-12 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <p className="mb-3 text-sm font-bold tracking-[0.2em] text-[#b58b45]">
+              THE COLLECTION
+            </p>
+            <h2 className="font-serif text-3xl font-bold text-[#234b3b] md:text-5xl">
+              Recently Added Books
+            </h2>
+            <p className="mt-4 text-[#6b716b]">
+              Fresh discoveries waiting to become your next favorite.
+            </p>
+          </div>
+
+          <Link
+            href="/books"
+            className="inline-flex items-center gap-2 font-semibold text-[#234b3b] transition hover:text-[#b58b45]"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            See All Books <ArrowRight size={18} />
+          </Link>
         </div>
-      </main>
+
+        {loading ? (
+          <div className="py-20 text-center text-[#6b716b]">
+            Loading our collection...
+          </div>
+        ) : error ? (
+          <div className="rounded-xl bg-red-50 p-6 text-center text-red-700">
+            {error} Please check that the backend server is running.
+          </div>
+        ) : books.length === 0 ? (
+          <div className="rounded-xl bg-[#f0eee7] p-10 text-center text-[#6b716b]">
+            No books have been added yet. Check back soon!
+          </div>
+        ) : (
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {books.map((book) => (
+              <article
+                key={book._id}
+                className="group overflow-hidden rounded-2xl border border-[#e9e4d9] bg-white transition duration-300 hover:-translate-y-2 hover:shadow-xl"
+              >
+                <div className="h-72 overflow-hidden bg-[#f0eee7]">
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
+                </div>
+
+                <div className="p-6">
+                  <span className="rounded-full bg-[#edf2ed] px-3 py-1 text-xs font-semibold text-[#234b3b]">
+                    {book.category}
+                  </span>
+
+                  <h3 className="mt-4 line-clamp-1 font-serif text-2xl font-bold text-[#234b3b]">
+                    {book.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-[#777d76]">
+                    By {book.author}
+                  </p>
+
+                  <Link
+                    href={`/books/${book._id}`}
+                    className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#234b3b] hover:text-[#b58b45]"
+                  >
+                    View Details <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Why BookNook */}
+      <section className="bg-[#eef0e9] py-20">
+        <div className="mx-auto max-w-7xl px-5 lg:px-8">
+          <div className="mx-auto mb-14 max-w-2xl text-center">
+            <p className="mb-3 text-sm font-bold tracking-[0.2em] text-[#b58b45]">
+              MORE THAN A LIBRARY
+            </p>
+            <h2 className="font-serif text-3xl font-bold text-[#234b3b] md:text-5xl">
+              A little space for big ideas.
+            </h2>
+            <p className="mt-5 leading-7 text-[#6b716b]">
+              BookNook makes it easier to discover books, share your
+              collection, and keep your reading journey moving.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              {
+                icon: <BookOpen size={30} />,
+                title: "Discover Stories",
+                text: "Explore books across different subjects and genres.",
+              },
+              {
+                icon: <Library size={30} />,
+                title: "Build Your Library",
+                text: "Add books and manage your personal collection.",
+              },
+              {
+                icon: <Sparkles size={30} />,
+                title: "Keep Exploring",
+                text: "Borrow books and discover something new every day.",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl bg-white p-9 text-center shadow-sm"
+              >
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#edf2ed] text-[#234b3b]">
+                  {item.icon}
+                </div>
+                <h3 className="font-serif text-xl font-bold text-[#234b3b]">
+                  {item.title}
+                </h3>
+                <p className="mt-3 leading-7 text-[#777d76]">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Reading Call to Action */}
+      <section className="bg-[#234b3b] px-5 py-20 text-center text-white">
+        <p className="mb-4 text-sm font-bold tracking-[0.2em] text-[#e2bd7c]">
+          YOUR NEXT CHAPTER STARTS HERE
+        </p>
+        <h2 className="mx-auto max-w-2xl font-serif text-3xl font-bold md:text-5xl">
+          Ready to find your next favorite book?
+        </h2>
+        <p className="mx-auto mt-5 max-w-xl leading-7 text-white/75">
+          Explore our collection and discover where your next reading
+          adventure takes you.
+        </p>
+        <Link
+          href="/books"
+          className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#d5ad67] px-8 py-4 font-semibold text-[#183729] transition hover:bg-white"
+        >
+          Explore the Library <ArrowRight size={18} />
+        </Link>
+      </section>
     </div>
   );
 }
