@@ -3,7 +3,7 @@
 
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   User,
@@ -13,17 +13,34 @@ import {
   PlusCircle,
   Library,
   BookMarked,
+  Pencil,
+  Save,
+  X,
 } from "lucide-react";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState("");
+  const [image, setImage] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
   useEffect(() => {
     if (!isPending && !session?.user) {
       router.replace("/login");
     }
   }, [isPending, session, router]);
+
+  useEffect(() => {
+    if (session?.user) {
+      setName(session.user.name || "");
+      setImage(session.user.image || "");
+    }
+  }, [session?.user]);
 
   if (isPending || !session?.user) {
     return (
@@ -64,6 +81,60 @@ export default function ProfilePage() {
     },
   ];
 
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setError("");
+
+    const trimmedName = name.trim();
+    const trimmedImage = image.trim();
+
+    if (!trimmedName) {
+      setError("Please enter your name.");
+      return;
+    }
+
+    if (trimmedImage) {
+      try {
+        const parsedUrl = new URL(trimmedImage);
+        if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+          throw new Error("Invalid image URL");
+        }
+      } catch {
+        setError("Please enter a valid image URL starting with https:// or http://.");
+        return;
+      }
+    }
+
+    setSaving(true);
+
+    try {
+      const result = await authClient.updateUser({
+        name: trimmedName,
+        image: trimmedImage || null,
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message || "Could not update your profile.");
+      }
+
+      setIsEditing(false);
+      setMessage("Your profile was updated successfully.");
+    } catch (err) {
+      setError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const cancelEditing = () => {
+    setName(user.name || "");
+    setImage(user.image || "");
+    setError("");
+    setMessage("");
+    setIsEditing(false);
+  };
+
   return (
     <section className="min-h-screen bg-[#f8f6f0] px-4 py-12">
       <div className="mx-auto max-w-4xl">
@@ -79,7 +150,6 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        {/* Profile information */}
         <div className="overflow-hidden rounded-2xl border border-[#e8e2d5] bg-white shadow-sm">
           <div className="h-32 bg-[#234b3b]" />
 
@@ -101,10 +171,86 @@ export default function ProfilePage() {
                 <h2 className="text-2xl font-bold text-[#234b3b]">
                   {user.name || "BookNook Reader"}
                 </h2>
-                <p className="text-sm text-gray-500">
-                  BookNook Member
-                </p>
+                <p className="text-sm text-gray-500">BookNook Member</p>
               </div>
+            </div>
+
+            <div className="mt-6">
+              {!isEditing ? (
+                <button
+                  onClick={() => {
+                    setMessage("");
+                    setError("");
+                    setIsEditing(true);
+                  }}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#234b3b] px-5 py-3 font-semibold text-white transition hover:bg-[#19392c]"
+                >
+                  <Pencil size={17} />
+                  Edit Profile
+                </button>
+              ) : (
+                <form onSubmit={handleSave} className="rounded-xl bg-[#f8f6f0] p-5">
+                  <h3 className="mb-5 text-lg font-bold text-[#234b3b]">
+                    Update Your Information
+                  </h3>
+
+                  <label className="mb-2 block text-sm font-semibold text-gray-700">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={80}
+                    required
+                    className="mb-4 w-full rounded-lg border border-[#e8e2d5] bg-white px-4 py-3 text-gray-800 outline-none focus:border-[#234b3b]"
+                    placeholder="Enter your name"
+                  />
+
+                  <label className="mb-2 block text-sm font-semibold text-gray-700">
+                    Profile Photo URL
+                  </label>
+                  <input
+                    type="url"
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
+                    className="mb-5 w-full rounded-lg border border-[#e8e2d5] bg-white px-4 py-3 text-gray-800 outline-none focus:border-[#234b3b]"
+                    placeholder="https://example.com/photo.jpg"
+                  />
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="inline-flex items-center gap-2 rounded-lg bg-[#234b3b] px-5 py-3 font-semibold text-white transition hover:bg-[#19392c] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Save size={17} />
+                      {saving ? "Saving..." : "Save Changes"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={cancelEditing}
+                      disabled={saving}
+                      className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-100"
+                    >
+                      <X size={17} />
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {message && (
+                <p role="status" className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
+                  {message}
+                </p>
+              )}
+              {error && (
+                <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                  {error}
+                </p>
+              )}
             </div>
 
             <div className="mt-8 grid gap-5 md:grid-cols-2">
@@ -138,16 +284,13 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Member Since</p>
-                  <p className="font-semibold text-gray-800">
-                    {accountDate}
-                  </p>
+                  <p className="font-semibold text-gray-800">{accountDate}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Quick links */}
         <div className="mt-10">
           <h2 className="mb-5 text-2xl font-bold text-[#234b3b]">
             Your BookNook Activities
@@ -164,9 +307,7 @@ export default function ProfilePage() {
                   className="rounded-xl border border-[#e8e2d5] bg-white p-6 transition hover:-translate-y-1 hover:shadow-md"
                 >
                   <Icon size={28} className="mb-4 text-[#b58b45]" />
-                  <h3 className="font-bold text-[#234b3b]">
-                    {item.title}
-                  </h3>
+                  <h3 className="font-bold text-[#234b3b]">{item.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-gray-600">
                     {item.description}
                   </p>
