@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   async function handleRegister(event) {
     event.preventDefault();
@@ -69,21 +70,41 @@ export default function RegisterPage() {
     }
   }
 
+  async function handleGoogleRegister() {
+    setError("");
+    setGoogleLoading(true);
+
+    try {
+      const result = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/add-book",
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message || "Google registration failed.");
+      }
+    } catch (err) {
+      setError(err.message || "Google registration failed.");
+      setGoogleLoading(false);
+    }
+  }
+
   return (
     <section className="flex min-h-[75vh] items-center justify-center bg-[#f8f6f0] px-4 py-12">
       <div className="w-full max-w-lg rounded-2xl border border-[#e8e2d5] bg-white p-8 shadow-sm">
+
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-[#234b3b]">
             Create Your Account
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-700">
             Join BookNook and share your love of reading.
           </p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-5">
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label className="mb-2 block font-semibold text-gray-800">
               Full Name
             </label>
             <input
@@ -92,12 +113,12 @@ export default function RegisterPage() {
               onChange={(event) => setName(event.target.value)}
               placeholder="Enter your full name"
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#234b3b]"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-600 focus:border-[#234b3b]"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label className="mb-2 block font-semibold text-gray-800">
               Email Address
             </label>
             <input
@@ -106,12 +127,12 @@ export default function RegisterPage() {
               onChange={(event) => setEmail(event.target.value)}
               placeholder="Enter your email"
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#234b3b]"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-600 focus:border-[#234b3b]"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label className="mb-2 block font-semibold text-gray-800">
               Profile Photo URL (Optional)
             </label>
             <input
@@ -119,12 +140,12 @@ export default function RegisterPage() {
               value={photo}
               onChange={(event) => setPhoto(event.target.value)}
               placeholder="https://example.com/photo.jpg"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#234b3b]"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-600 focus:border-[#234b3b]"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label className="mb-2 block font-semibold text-gray-800">
               Password
             </label>
             <input
@@ -133,15 +154,15 @@ export default function RegisterPage() {
               onChange={(event) => setPassword(event.target.value)}
               placeholder="At least 6 characters"
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#234b3b]"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-600 focus:border-[#234b3b]"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-sm text-gray-700">
               Include an uppercase and a lowercase letter.
             </p>
           </div>
 
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label className="mb-2 block font-semibold text-gray-800">
               Confirm Password
             </label>
             <input
@@ -150,32 +171,53 @@ export default function RegisterPage() {
               onChange={(event) => setConfirmPassword(event.target.value)}
               placeholder="Enter your password again"
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#234b3b]"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-600 focus:border-[#234b3b]"
             />
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-800">
               {error}
             </p>
           )}
 
           {success && (
-            <p className="rounded-lg bg-green-50 p-3 text-sm text-green-700">
+            <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800">
               {success}
             </p>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || googleLoading}
             className="w-full rounded-lg bg-[#234b3b] px-5 py-3 font-semibold text-white hover:bg-[#18382c] disabled:opacity-60"
           >
             {loading ? "Creating Account..." : "Register"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-gray-300" />
+          <span className="text-sm text-gray-600">OR</span>
+          <div className="h-px flex-1 bg-gray-300" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleRegister}
+          disabled={loading || googleLoading}
+          className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
+        >
+          <svg viewBox="0 0 48 48" className="h-5 w-5">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z" />
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.95 46.98 31.82 46.98 24.55Z" />
+            <path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19Z" />
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.45-4.89 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z" />
+          </svg>
+          {googleLoading ? "Connecting to Google..." : "Continue with Google"}
+        </button>
+
+        <p className="mt-6 text-center text-sm text-gray-700">
           Already have an account?{" "}
           <Link
             href="/login"
