@@ -1,10 +1,14 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+  LoaderCircle,
+  CheckCircle2,
+  AlertCircle,
+  ImagePlus,
+} from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -29,8 +33,8 @@ export default function AddBookPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-  document.title = "Add Book | BookNook";
-}, []);
+    document.title = "Add Book | BookNook";
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -47,6 +51,9 @@ export default function AddBookPage() {
       ...previous,
       [name]: value,
     }));
+
+    setError("");
+    setMessage("");
   }
 
   function handleImageChange(event) {
@@ -93,7 +100,9 @@ export default function AddBookPage() {
     }
 
     if (!API_URL) {
-      setError("Backend API URL is missing. Please check your .env.local file.");
+      setError(
+        "Backend API URL is missing. Please check your .env.local file."
+      );
       return;
     }
 
@@ -188,11 +197,12 @@ export default function AddBookPage() {
 
       setImageFile(null);
       setPreview("");
+
       event.target.reset();
 
       setTimeout(() => {
         router.push("/books");
-      }, 1200);
+      }, 1500);
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -202,8 +212,11 @@ export default function AddBookPage() {
 
   if (isPending) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-gray-600">Checking your login...</p>
+      <div className="flex min-h-[60vh] items-center justify-center gap-3">
+        <LoaderCircle className="animate-spin text-[#234b3b]" size={26} />
+        <p className="font-medium text-gray-600">
+          Checking your login...
+        </p>
       </div>
     );
   }
@@ -215,13 +228,14 @@ export default function AddBookPage() {
           Login Required
         </h1>
 
-        <p className="text-gray-600">
+        <p className="max-w-md text-gray-600">
           Please log in to add a book to BookNook.
         </p>
 
         <button
+          type="button"
           onClick={() => router.push("/login")}
-          className="rounded-lg bg-[#234b3b] px-6 py-3 font-semibold text-white hover:bg-[#18382c]"
+          className="rounded-lg bg-[#234b3b] px-6 py-3 font-semibold text-white transition hover:bg-[#18382c]"
         >
           Go to Login
         </button>
@@ -230,32 +244,40 @@ export default function AddBookPage() {
   }
 
   return (
-    <section className="min-h-screen bg-[#f8f6f0] px-4 py-12">
+    <section className="min-h-screen bg-[#f8f6f0] px-4 py-10 sm:py-12">
       <div className="mx-auto max-w-3xl">
+        {/* Page heading */}
         <div className="mb-8 text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#b58b45]">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#b58b45] sm:text-sm">
             Share the joy of reading
           </p>
 
-          <h1 className="text-3xl font-bold text-[#234b3b] md:text-4xl">
+          <h1 className="text-3xl font-bold text-[#234b3b] sm:text-4xl">
             Add a New Book
           </h1>
 
-          <p className="mt-3 text-gray-600">
-            Add a book to your BookNook collection.
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-gray-600 sm:text-base">
+            Add a book to your BookNook collection and share it with other
+            readers.
           </p>
         </div>
 
+        {/* Book form */}
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 rounded-2xl border border-[#e8e2d5] bg-white p-6 shadow-sm md:p-9"
+          className="space-y-6 rounded-2xl border border-[#e8e2d5] bg-white p-5 shadow-sm sm:p-7 md:p-9"
         >
+          {/* Title */}
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label
+              htmlFor="title"
+              className="mb-2 block text-sm font-semibold text-gray-700"
+            >
               Book Title *
             </label>
 
             <input
+              id="title"
               type="text"
               name="title"
               value={form.title}
@@ -263,16 +285,26 @@ export default function AddBookPage() {
               placeholder="Enter book title"
               maxLength={150}
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 placeholder:text-gray-500 outline-none focus:border-[#234b3b]"
+              disabled={loading}
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 placeholder:text-gray-500 outline-none transition focus:border-[#234b3b] focus:ring-2 focus:ring-[#234b3b]/10 disabled:bg-gray-100"
             />
+
+            <p className="mt-1 text-right text-xs text-gray-500">
+              {form.title.length}/150 characters
+            </p>
           </div>
 
+          {/* Author */}
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label
+              htmlFor="author"
+              className="mb-2 block text-sm font-semibold text-gray-700"
+            >
               Author *
             </label>
 
             <input
+              id="author"
               type="text"
               name="author"
               value={form.author}
@@ -280,22 +312,29 @@ export default function AddBookPage() {
               placeholder="Enter author's name"
               maxLength={100}
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 placeholder:text-gray-500 outline-none focus:border-[#234b3b]"
+              disabled={loading}
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 placeholder:text-gray-500 outline-none transition focus:border-[#234b3b] focus:ring-2 focus:ring-[#234b3b]/10 disabled:bg-gray-100"
             />
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          {/* Category and copies */}
+          <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block font-semibold text-gray-700">
+              <label
+                htmlFor="category"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 Category *
               </label>
 
               <select
+                id="category"
                 name="category"
                 value={form.category}
                 onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 outline-none focus:border-[#234b3b]"
+                disabled={loading}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 outline-none transition focus:border-[#234b3b] focus:ring-2 focus:ring-[#234b3b]/10 disabled:bg-gray-100"
               >
                 <option value="">Choose a category</option>
 
@@ -308,11 +347,15 @@ export default function AddBookPage() {
             </div>
 
             <div>
-              <label className="mb-2 block font-semibold text-gray-700">
+              <label
+                htmlFor="totalCopies"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 Total Copies *
               </label>
 
               <input
+                id="totalCopies"
                 type="number"
                 name="totalCopies"
                 value={form.totalCopies}
@@ -320,45 +363,81 @@ export default function AddBookPage() {
                 min="1"
                 step="1"
                 required
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 outline-none focus:border-[#234b3b]"
+                disabled={loading}
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 outline-none transition focus:border-[#234b3b] focus:ring-2 focus:ring-[#234b3b]/10 disabled:bg-gray-100"
               />
             </div>
           </div>
 
+          {/* Image upload */}
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label
+              htmlFor="bookImage"
+              className="mb-2 block text-sm font-semibold text-gray-700"
+            >
               Book Cover Image *
             </label>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              required
-              className="w-full rounded-lg border border-gray-300 p-3 text-sm text-gray-700"
-            />
+            <label
+              htmlFor="bookImage"
+              className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#d6d0c4] bg-[#faf9f6] px-5 py-7 text-center transition hover:border-[#234b3b] hover:bg-[#f5f4ed] ${
+                loading ? "pointer-events-none opacity-60" : ""
+              }`}
+            >
+              <ImagePlus size={32} className="mb-3 text-[#b58b45]" />
 
-            <p className="mt-2 text-xs text-gray-500">
-              Choose an image from your computer. Maximum size: 5 MB.
-            </p>
+              <span className="font-semibold text-[#234b3b]">
+                {imageFile ? "Change selected image" : "Choose a book cover"}
+              </span>
 
+              <span className="mt-2 text-xs text-gray-500">
+                JPG, PNG, WEBP or other image formats · Maximum 5 MB
+              </span>
+
+              <input
+                id="bookImage"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                required
+                disabled={loading}
+                className="sr-only"
+              />
+            </label>
+
+            {imageFile && (
+              <p className="mt-2 break-all text-sm text-gray-600">
+                Selected: {imageFile.name}
+              </p>
+            )}
+
+            {/* Image preview */}
             {preview && (
-              <div className="mt-4">
+              <div className="mt-5 rounded-xl border border-[#e8e2d5] bg-[#eee9df] p-4">
+                <p className="mb-3 text-sm font-semibold text-[#234b3b]">
+                  Image Preview
+                </p>
+
                 <img
                   src={preview}
                   alt="Selected book cover preview"
-                  className="h-52 w-40 rounded-lg border object-cover shadow-sm"
+                  className="mx-auto h-64 w-full rounded-lg object-contain"
                 />
               </div>
             )}
           </div>
 
+          {/* Description */}
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label
+              htmlFor="description"
+              className="mb-2 block text-sm font-semibold text-gray-700"
+            >
               Description *
             </label>
 
             <textarea
+              id="description"
               name="description"
               value={form.description}
               onChange={handleChange}
@@ -366,16 +445,26 @@ export default function AddBookPage() {
               rows={5}
               maxLength={2000}
               required
-              className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 text-gray-800 placeholder:text-gray-500 outline-none focus:border-[#234b3b]"
+              disabled={loading}
+              className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 text-gray-800 placeholder:text-gray-500 outline-none transition focus:border-[#234b3b] focus:ring-2 focus:ring-[#234b3b]/10 disabled:bg-gray-100"
             />
+
+            <p className="mt-1 text-right text-xs text-gray-500">
+              {form.description.length}/2000 characters
+            </p>
           </div>
 
+          {/* Added by */}
           <div>
-            <label className="mb-2 block font-semibold text-gray-700">
+            <label
+              htmlFor="addedBy"
+              className="mb-2 block text-sm font-semibold text-gray-700"
+            >
               Added By
             </label>
 
             <input
+              id="addedBy"
               type="text"
               value={session.user.name || session.user.email}
               readOnly
@@ -387,30 +476,47 @@ export default function AddBookPage() {
             </p>
           </div>
 
+          {/* Error message */}
           {error && (
-            <p
+            <div
               role="alert"
-              className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+              className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
             >
-              {error}
-            </p>
+              <AlertCircle size={20} className="mt-0.5 shrink-0" />
+              <p>{error}</p>
+            </div>
           )}
 
+          {/* Success message */}
           {message && (
-            <p
+            <div
               role="status"
-              className="rounded-lg bg-green-50 p-3 text-sm text-green-700"
+              className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700"
             >
-              {message}
-            </p>
+              <CheckCircle2 size={20} className="shrink-0" />
+              <p>{message}</p>
+            </div>
           )}
 
+          {/* Submit button */}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-[#234b3b] px-6 py-4 font-semibold text-white transition hover:bg-[#18382c] disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={loading || !!message}
+            className="flex w-full items-center justify-center gap-3 rounded-lg bg-[#234b3b] px-6 py-4 font-semibold text-white transition hover:bg-[#18382c] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Uploading Image & Saving Book..." : "Add Book"}
+            {loading ? (
+              <>
+                <LoaderCircle size={20} className="animate-spin" />
+                Uploading Image & Saving Book...
+              </>
+            ) : message ? (
+              <>
+                <CheckCircle2 size={20} />
+                Book Added Successfully
+              </>
+            ) : (
+              "Add Book"
+            )}
           </button>
         </form>
       </div>
