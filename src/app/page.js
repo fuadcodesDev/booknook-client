@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -16,6 +15,8 @@ import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
+
+import BookCover from "@/components/BookCover";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -195,25 +196,12 @@ export default function Home() {
                   key={book._id}
                   className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#e9e4d9] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
-                  {/* Book cover */}
-                  <div className="relative flex h-64 items-center justify-center overflow-hidden bg-[#f0eee7] p-3 sm:h-72">
-                    <BookOpen
-                      size={48}
-                      className="absolute text-[#b58b45]/50"
-                    />
-
-                    {book.image && (
-                      <img
-                        src={book.image}
-                        alt={`${book.title} book cover`}
-                        loading="lazy"
-                        className="relative z-10 h-full w-full object-contain transition duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    )}
-                  </div>
+                  {/* Reusable book cover */}
+                  <BookCover
+                    src={book.image}
+                    title={book.title}
+                    className="h-64 p-3 sm:h-72 transition duration-500 group-hover:scale-[1.02]"
+                  />
 
                   {/* Book information */}
                   <div className="flex flex-1 flex-col p-5 sm:p-6">
@@ -231,7 +219,8 @@ export default function Home() {
                       </p>
 
                       <p className="mt-3 min-h-[3rem] line-clamp-2 text-sm leading-6 text-[#6b716b]">
-                        {book.description || "Discover this book in our library."}
+                        {book.description ||
+                          "Discover this book in our library."}
                       </p>
                     </div>
 

@@ -1,9 +1,9 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, BookOpen, LoaderCircle } from "lucide-react";
+import BookCover from "@/components/BookCover";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -64,7 +64,6 @@ export default function BooksPage() {
   return (
     <section className="min-h-screen bg-[#f8f6f0] px-4 py-12">
       <div className="mx-auto max-w-7xl">
-
         {/* Page heading */}
         <div className="mb-10 text-center">
           <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#b58b45]">
@@ -156,25 +155,12 @@ export default function BooksPage() {
                   key={book._id}
                   className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#e8e2d5] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
                 >
-                  {/* Consistent book cover */}
-                  <div className="relative flex h-64 items-center justify-center bg-[#eee9df] p-3">
-                    <BookOpen
-                      size={48}
-                      className="absolute text-[#b58b45]/50"
-                    />
-
-                    {book.image && (
-                      <img
-                        src={book.image}
-                        alt={`${book.title} book cover`}
-                        loading="lazy"
-                        className="relative z-10 h-full w-full object-contain"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    )}
-                  </div>
+                  {/* Reusable book cover */}
+                  <BookCover
+                    src={book.image}
+                    title={book.title}
+                    className="h-64 p-3"
+                  />
 
                   {/* Book information */}
                   <div className="flex flex-1 flex-col p-5">
